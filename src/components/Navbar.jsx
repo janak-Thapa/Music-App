@@ -8,23 +8,31 @@ const Navbar = () => {
   const { setSearchedSongs } = useContext(MusicContext);
 
   const searchSongs = async (e) => {
-    const res = await axios.get(
-      `https://saavn.me/search/songs?query=${e.target.value}&page=1&limit=2`
-    );
-    const { data } = await res.data;
-    if (
-      data.results.length === 0 ||
-      e.target.value === " " ||
-      e.target.value.length === 0
-    ) {
+    try {
+      const searchQuery = e.target.value;
+      if (!searchQuery.trim()) {
+        // If search query is empty, clear searchedSongs
+        setSearchedSongs([]);
+        return;
+      }
+  
+      const res = await axios.get(
+        `https://saavn.dev/search/songs?query=${encodeURIComponent(searchQuery)}&page=1&limit=2`
+      );
+  
+      const { data } = res.data;
+      if (!data || data.results.length === 0) {
+        setSearchedSongs([]);
+      } else {
+        setSearchedSongs(data.results);
+      }
+      console.log(data.results);
+    } catch (error) {
+      console.error("Error fetching data:", error);
       setSearchedSongs([]);
-    } else {
-      setSearchedSongs(data.results);
     }
-
-    console.log(data.results);
   };
-
+  
   return (
     <nav className="flex justify-between items-center py-3 border-none lg:border px-2 fixed top-0 left-0 right-0 bg-[#f5f5f5ff] z-20">
       {/* 1st div */}
